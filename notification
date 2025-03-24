@@ -4,8 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 
 # Telegram Bot Credentials
-TELEGRAM_BOT_TOKEN = "8088571737:AAHRtKqOuwtHpCLqJgPbCBdAx8hsl91fwJY"
-TELEGRAM_CHAT_ID = "1996770098"
+TELEGRAM_BOT_TOKEN=your_token_here
+TELEGRAM_CHAT_ID=your_chat_id_here
 
 def send_alert(event_name, event_details, event_url=None):
     """Sends alerts via Telegram for any event."""
@@ -18,7 +18,7 @@ def send_alert(event_name, event_details, event_url=None):
 def send_telegram_alert(message):
     """Sends a message via Telegram bot."""
     url = f"https://api.telegram.org/bot8088571737:AAHRtKqOuwtHpCLqJgPbCBdAx8hsl91fwJY/sendMessage"
-    data = {"chat_id": 1996770098, "text": message}
+    data = {"chat_id":{TELEGRAM_CHAT_ID} , "text": message}
     try:
         response = requests.post(url, data=data, timeout=10)
         if response.status_code != 200:
