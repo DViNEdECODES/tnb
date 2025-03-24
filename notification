@@ -1,0 +1,61 @@
+
+import time
+import requests
+from bs4 import BeautifulSoup
+
+# Telegram Bot Credentials
+TELEGRAM_BOT_TOKEN = "8088571737:AAHRtKqOuwtHpCLqJgPbCBdAx8hsl91fwJY"
+TELEGRAM_CHAT_ID = "1996770098"
+
+def send_alert(event_name, event_details, event_url=None):
+    """Sends alerts via Telegram for any event."""
+    message = f"🚀 Alert: {event_name}\nDetails: {event_details}"
+    if event_url:
+        message += f"\n🔗 More info: {event_url}"
+    print(f"🚀 Sending alert: {message}")
+    send_telegram_alert(message)
+
+def send_telegram_alert(message):
+    """Sends a message via Telegram bot."""
+    url = f"https://api.telegram.org/bot8088571737:AAHRtKqOuwtHpCLqJgPbCBdAx8hsl91fwJY/sendMessage"
+    data = {"chat_id": 1996770098, "text": message}
+    try:
+        response = requests.post(url, data=data, timeout=10)
+        if response.status_code != 200:
+            print(f"Failed to send Telegram message. Status Code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending Telegram message: {e}")
+
+def check_event_status(event_url, check_condition):
+    """Checks if a specified condition is met on the given event page."""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://www.google.com/",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+    
+    session = requests.Session()
+    session.headers.update(headers)
+    
+    try:
+        response = session.get(event_url, timeout=10)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, "html.parser")
+            if check_condition(soup):
+                send_alert("Event Update!", "Tickets may be available!", event_url)
+            else:
+                print("No update yet.")
+        else:
+            print(f"Failed to fetch event page. Status Code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching event page: {e}")
+
+def bookmyshow_ticket_check(soup):
+    """Condition to check ticket availability on BookMyShow."""
+    return "Sold Out" not in soup.get_text()
+
+if __name__ == "__main__":
+    event_url = input("Enter the event URL: ")
+    while True:
+        check_event_status(event_url, bookmyshow_ticket_check)
+        time.sleep(3600)
